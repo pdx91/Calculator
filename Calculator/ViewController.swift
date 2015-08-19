@@ -47,7 +47,8 @@ class ViewController: UIViewController
 
     var displayValue: Double {
         get {
-            return (display.text! as NSString).doubleValue
+            
+            return display.text!.toDouble()!
         }
         set {
             display.text = "\(newValue)"
@@ -69,5 +70,10 @@ class ViewController: UIViewController
     
 
 
+}
+extension String {
+    func toDouble() -> Double? {
+        return NSNumberFormatter().numberFromString(self)?.doubleValue
+    }
 }
 
