@@ -12,10 +12,14 @@ class ViewController: UIViewController
 {
 
     @IBOutlet weak var display: UILabel!
+    
     @IBOutlet weak var decimal: UIButton!
+    
     var userIsTyping = false
-    var opStack = [Double]()
+    
     @IBOutlet weak var historyLabel: UILabel!
+    
+    let brain = CalculatorBrain()
     
     @IBAction func appendDigit(sender: UIButton) {
         
@@ -46,36 +50,19 @@ class ViewController: UIViewController
     }
 
     @IBAction func operation(sender: UIButton) {
-        let calculation = sender.currentTitle!
+        if let calculation = sender.currentTitle {
+            if let result = brain.performOperation(calculation) {
+                displayValue = result
+            }
+        }
         if userIsTyping {
             enter()
         }
-        switch calculation {
-        case "÷": binaryOperation() { $1 / $0 }
-        case "×": binaryOperation() { $0 * $1 }
-        case "−": binaryOperation() { $1 - $0 }
-        case "+": binaryOperation() { $0 + $1 }
-        case"√": unaryOperation() { sqrt($0) }
-        case "sin": unaryOperation() { sin($0) }
-        case "cos": unaryOperation() { cos($0) }
-        default: break
-        }
+        
         enter()
    }
 
-    func binaryOperation(operation: (Double, Double) -> Double) {
-        if opStack.count >= 2 {
-        displayValue = operation(opStack.removeLast(), opStack.removeLast())
-        }
-    }
-    
-    func unaryOperation(operation: Double -> Double) {
-        if opStack.count >= 1 {
-        displayValue = operation(opStack.removeLast())
-        }
-    }
-
-    var displayValue: Double {
+        var displayValue: Double {
         get {
             
             return display.text!.toDouble()!
@@ -86,23 +73,22 @@ class ViewController: UIViewController
     }
     
     @IBAction func enter() {
+        if let result = brain.pushOperand(displayValue) {
+            displayValue = result
+        } else {
+            displayValue = 0
+        }
         userIsTyping = false
-        opStack.append(displayValue)
-        println("opStack = \(opStack)")
         decimal.enabled = true
     }
     
     
     @IBAction func clear() {
-        opStack.removeAll()
-        println("opStack = \(opStack)")
+        brain.clear()
         display.text = "0"
         userIsTyping = false
         decimal.enabled = true
     }
-    
-
-
 }
 extension String {
     func toDouble() -> Double? {

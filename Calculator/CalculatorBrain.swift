@@ -30,18 +30,6 @@ class CalculatorBrain {
         knownOps["cos"] = Op.UnaryOperation("√", cos)
     }
     
-    func pushOperand(operand: Double) {
-        opStack.append(Op.Operand(operand))
-    }
-    
-    
-    
-    func performOperation(symbol: String) {
-        if let operation = knownOps[symbol] {
-            opStack.append(operation)
-        }
-    }
-    
     private func evaluate(ops: [Op]) -> (result: Double?, remainingOps: [Op]) {
         
         if !ops.isEmpty {
@@ -60,7 +48,7 @@ class CalculatorBrain {
                 if let op1 = op1Evaluation.result {
                     let op2Evaluation = evaluate(op1Evaluation.remainingOps)
                     if let op2 = op2Evaluation.result {
-                    return (operation(op1, op2), op2Evaluation.remainingOps)
+                        return (operation(op1, op2), op2Evaluation.remainingOps)
                     }
                 }
             }
@@ -71,6 +59,26 @@ class CalculatorBrain {
     func evaluate() -> Double? {
         let (result, remainder) = evaluate(opStack)
         return result
+    }
+    
+
+    
+    func pushOperand(operand: Double) -> Double? {
+        opStack.append(Op.Operand(operand))
+        return evaluate()
+    }
+    
+    
+    
+    func performOperation(symbol: String) -> Double? {
+        if let operation = knownOps[symbol] {
+            opStack.append(operation)
+        }
+        return evaluate()
+    }
+    
+        func clear() {
+        opStack.removeAll()
     }
     
     
