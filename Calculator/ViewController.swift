@@ -12,36 +12,66 @@ class ViewController: UIViewController
 {
 
     @IBOutlet weak var display: UILabel!
+    @IBOutlet weak var decimal: UIButton!
     var userIsTyping = false
     var opStack = [Double]()
+    @IBOutlet weak var historyLabel: UILabel!
     
     @IBAction func appendDigit(sender: UIButton) {
-        let digit = sender.currentTitle!
         
-        if userIsTyping {
-            display.text! = display.text! + digit
-        } else {
-            display.text = digit
-            userIsTyping = true
+        let digit = sender.currentTitle!
+        let pi = M_PI
+        
+        var decimalPresent: Bool {
+            if display.text!.rangeOfString(".") != nil {
+                return true
+            }
+            return false
+        }
+        
+        println("\(decimalPresent)")
+        if decimalPresent {
+            decimal.enabled = false
+        }
+        if !userIsTyping && digit == "π" {
+            displayValue = pi
+        }
+            if userIsTyping {
+                display.text! = display.text! + digit
+            }
+            else {
+                display.text! = digit
+                userIsTyping = true
         }
     }
 
-
     @IBAction func operation(sender: UIButton) {
         let calculation = sender.currentTitle!
-        enter()
+        if userIsTyping {
+            enter()
+        }
         switch calculation {
-        case "÷": performOperation() { $1 / $0 }
-        case "×": performOperation() { $0 * $1 }
-        case "−": performOperation() { $1 - $0 }
-        case "+": performOperation() { $0 + $1 }
+        case "÷": binaryOperation() { $1 / $0 }
+        case "×": binaryOperation() { $0 * $1 }
+        case "−": binaryOperation() { $1 - $0 }
+        case "+": binaryOperation() { $0 + $1 }
+        case"√": unaryOperation() { sqrt($0) }
+        case "sin": unaryOperation() { sin($0) }
+        case "cos": unaryOperation() { cos($0) }
         default: break
         }
+        enter()
    }
 
-    func performOperation(operation: (Double, Double) -> Double) {
+    func binaryOperation(operation: (Double, Double) -> Double) {
         if opStack.count >= 2 {
-            displayValue = operation(opStack.removeLast(), opStack.removeLast())
+        displayValue = operation(opStack.removeLast(), opStack.removeLast())
+        }
+    }
+    
+    func unaryOperation(operation: Double -> Double) {
+        if opStack.count >= 1 {
+        displayValue = operation(opStack.removeLast())
         }
     }
 
@@ -59,6 +89,7 @@ class ViewController: UIViewController
         userIsTyping = false
         opStack.append(displayValue)
         println("opStack = \(opStack)")
+        decimal.enabled = true
     }
     
     
@@ -66,6 +97,8 @@ class ViewController: UIViewController
         opStack.removeAll()
         println("opStack = \(opStack)")
         display.text = "0"
+        userIsTyping = false
+        decimal.enabled = true
     }
     
 
